@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "351115039313",
+    "project_id": "suryaparfumv2",
+    "storage_bucket": "suryaparfumv2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:351115039313:android:bd6e55e19fe6f922ccde70",
+        "android_client_info": {
+          "package_name": "com.surya.parfum"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAUoOyhelg6Hi2BBLBJGn8wqHpOqxdoBvg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
