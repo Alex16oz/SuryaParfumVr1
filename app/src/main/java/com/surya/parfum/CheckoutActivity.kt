@@ -53,7 +53,6 @@ class CheckoutActivity : AppCompatActivity() {
 
     // Fungsi setupListeners, getCurrentLocation, dan onRequestPermissionsResult tidak berubah
     private fun setupListeners() {
-        // ... (kode ini tetap sama)
         binding.rgMetode.setOnCheckedChangeListener { _, checkedId ->
             if (checkedId == R.id.rbAntar) {
                 binding.layoutPengiriman.visibility = View.VISIBLE
@@ -63,24 +62,35 @@ class CheckoutActivity : AppCompatActivity() {
                 binding.btnViewStoreLocation.visibility = View.VISIBLE
             }
         }
+
+        // ===== BAGIAN YANG DIPERBARUI ADA DI SINI =====
         binding.btnViewStoreLocation.setOnClickListener {
             val tokoLatitude = -7.827650797282661
             val tokoLongitude = 112.03274612688416
             val tokoLabel = "Toko Surya Parfum"
-            val gmmIntentUri = Uri.parse("geo:$tokoLatitude,$tokoLongitude?q=$tokoLatitude,$tokoLongitude($tokoLabel)")
+
+            // FORMAT URI BARU: geo:0,0?q=lat,lng(label)
+            // Ini adalah cara paling ampuh untuk menjatuhkan pin
+            val gmmIntentUri = Uri.parse("geo:0,0?q=$tokoLatitude,$tokoLongitude($tokoLabel)")
+
             val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
             mapIntent.setPackage("com.google.android.apps.maps")
+
             if (mapIntent.resolveActivity(packageManager) != null) {
                 startActivity(mapIntent)
             } else {
-                Toast.makeText(this, "Membuka di browser...", Toast.LENGTH_SHORT).show()
-                val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://maps.google.com/"))
+                // Fallback ke browser jika Google Maps tidak ada
+                Toast.makeText(this, "Aplikasi Maps tidak ditemukan, membuka di browser...", Toast.LENGTH_SHORT).show()
+                // URL Fallback juga diperbaiki
+                val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse("http://maps.google.com/maps?q=loc:$tokoLatitude,$tokoLongitude($tokoLabel)"))
                 startActivity(webIntent)
             }
         }
+
         binding.btnGetLocation.setOnClickListener {
             getCurrentLocation()
         }
+
         binding.btnPlaceOrder.setOnClickListener {
             placeOrder()
         }

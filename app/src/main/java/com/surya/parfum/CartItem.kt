@@ -4,10 +4,14 @@ import android.os.Parcelable
 import com.google.firebase.firestore.Exclude
 import kotlinx.parcelize.Parcelize
 
-@Parcelize // Tambahkan anotasi ini
+@Parcelize
 data class CartItem(
     @get:Exclude
     var id: String = "",
+
+    // TAMBAHKAN DUA BARIS INI
+    val userId: String = "",
+    val productId: String = "",
 
     val productName: String = "",
     val selectedSize: Int = 0,
@@ -15,9 +19,7 @@ data class CartItem(
     val totalPrice: Long = 0,
     val imageUrl: String = "",
 
-    // Properti baru untuk melacak status centang
-    // @get:Exclude agar tidak disimpan ke Firestore
     @get:Exclude
-    var isSelected: Boolean = true // Defaultnya semua item terpilih
+    var isSelected: Boolean = true
 
-) : Parcelable // Implementasikan Parcelable
+) : Parcelable

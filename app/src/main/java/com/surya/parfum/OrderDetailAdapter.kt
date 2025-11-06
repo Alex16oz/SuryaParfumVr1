@@ -7,7 +7,7 @@ import com.google.firebase.Timestamp
 import com.surya.parfum.databinding.ItemOrderDetailBinding
 
 // Kita gunakan HashMap untuk fleksibilitas karena data item disimpan sebagai Map di Firestore
-class OrderDetailAdapter(private val items: List<HashMap<String, Any>>) :
+class  OrderDetailAdapter(private val items: List<HashMap<String, Any>>) :
     RecyclerView.Adapter<OrderDetailAdapter.ViewHolder>() {
 
     inner class ViewHolder(val binding: ItemOrderDetailBinding) : RecyclerView.ViewHolder(binding.root)

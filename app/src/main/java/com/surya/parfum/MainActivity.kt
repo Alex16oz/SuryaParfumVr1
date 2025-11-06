@@ -64,7 +64,6 @@ class MainActivity : AppCompatActivity() {
     private fun showPopupMenu() {
         // Find the view of the profile icon to use as an "anchor" for the popup
         val anchorView = findViewById<View>(R.id.action_profile)
-
         // Create the PopupMenu
         val popup = PopupMenu(this, anchorView)
         popup.menuInflater.inflate(R.menu.profile_popup_menu, popup.menu)
