@@ -46,7 +46,7 @@ class CartActivity : AppCompatActivity() {
             }
 
             val intent = Intent(this, CheckoutActivity::class.java).apply {
-                // Kirim daftar item yang terpilih (membutuhkan CartItem jadi Parcelable)
+                // Kirim daftar item yang terpilih
                 putParcelableArrayListExtra("SELECTED_ITEMS", selectedItems)
                 // Kirim total harga yang sudah dihitung
                 putExtra("TOTAL_AMOUNT", totalAmount)
@@ -56,10 +56,11 @@ class CartActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
+        // Pastikan CartAdapter Anda sudah mendukung callback ini
         cartAdapter = CartAdapter(
             cartItemList,
             onSelectionChanged = {
-                updateTotal() // Panggil updateTotal setiap kali ada perubahan centang
+                updateTotal() // Update total saat checkbox berubah
             },
             onDeleteClick = { cartItem ->
                 deleteCartItem(cartItem)
@@ -88,12 +89,13 @@ class CartActivity : AppCompatActivity() {
                         val cartItem = document.toObject(CartItem::class.java)
                         if (cartItem != null) {
                             cartItem.id = document.id
-                            cartItem.isSelected = true // Set default semua item terpilih
+                            // Default terpilih saat pertama load, atau bisa simpan state
+                            cartItem.isSelected = true
                             cartItemList.add(cartItem)
                         }
                     }
                     cartAdapter.notifyDataSetChanged()
-                    updateTotal()
+                    updateTotal() // Hitung total awal
                     checkIfEmpty()
                 }
             }
@@ -104,6 +106,7 @@ class CartActivity : AppCompatActivity() {
             .delete()
             .addOnSuccessListener {
                 Toast.makeText(this, "${cartItem.productName} dihapus dari keranjang", Toast.LENGTH_SHORT).show()
+                // Adapter akan otomatis refresh karena ada addSnapshotListener
             }
             .addOnFailureListener {
                 Toast.makeText(this, "Gagal menghapus item", Toast.LENGTH_SHORT).show()
@@ -119,7 +122,7 @@ class CartActivity : AppCompatActivity() {
         totalAmount = total
         binding.tvTotalPrice.text = "Rp $total"
 
-        // Nonaktifkan tombol checkout jika tidak ada item yang dipilih (total 0)
+        // Nonaktifkan tombol checkout jika total 0
         binding.btnCheckout.isEnabled = total > 0
     }
 
@@ -127,6 +130,7 @@ class CartActivity : AppCompatActivity() {
         if (cartItemList.isEmpty()) {
             binding.tvEmptyCart.visibility = View.VISIBLE
             binding.rvCartItems.visibility = View.GONE
+            binding.btnCheckout.isEnabled = false
         } else {
             binding.tvEmptyCart.visibility = View.GONE
             binding.rvCartItems.visibility = View.VISIBLE

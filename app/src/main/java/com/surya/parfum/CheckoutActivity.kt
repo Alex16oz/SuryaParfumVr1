@@ -25,7 +25,6 @@ class CheckoutActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
 
     private var totalAmount: Long = 0
-    // Mengganti nama variabel agar lebih jelas
     private val selectedItems = mutableListOf<CartItem>()
     private var customerLocation: GeoPoint? = null
     private val LOCATION_PERMISSION_REQ_CODE = 1000
@@ -38,7 +37,6 @@ class CheckoutActivity : AppCompatActivity() {
         db = FirebaseFirestore.getInstance()
         auth = FirebaseAuth.getInstance()
 
-        // === PERUBAHAN UTAMA 1: Menerima data dari Intent ===
         totalAmount = intent.getLongExtra("TOTAL_AMOUNT", 0)
         // Terima daftar item yang terpilih
         intent.getParcelableArrayListExtra<CartItem>("SELECTED_ITEMS")?.let {
@@ -51,7 +49,6 @@ class CheckoutActivity : AppCompatActivity() {
         setupListeners()
     }
 
-    // Fungsi setupListeners, getCurrentLocation, dan onRequestPermissionsResult tidak berubah
     private fun setupListeners() {
         binding.rgMetode.setOnCheckedChangeListener { _, checkedId ->
             if (checkedId == R.id.rbAntar) {
@@ -63,14 +60,11 @@ class CheckoutActivity : AppCompatActivity() {
             }
         }
 
-        // ===== BAGIAN YANG DIPERBARUI ADA DI SINI =====
         binding.btnViewStoreLocation.setOnClickListener {
             val tokoLatitude = -7.827650797282661
             val tokoLongitude = 112.03274612688416
             val tokoLabel = "Toko Surya Parfum"
 
-            // FORMAT URI BARU: geo:0,0?q=lat,lng(label)
-            // Ini adalah cara paling ampuh untuk menjatuhkan pin
             val gmmIntentUri = Uri.parse("geo:0,0?q=$tokoLatitude,$tokoLongitude($tokoLabel)")
 
             val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
@@ -79,9 +73,7 @@ class CheckoutActivity : AppCompatActivity() {
             if (mapIntent.resolveActivity(packageManager) != null) {
                 startActivity(mapIntent)
             } else {
-                // Fallback ke browser jika Google Maps tidak ada
                 Toast.makeText(this, "Aplikasi Maps tidak ditemukan, membuka di browser...", Toast.LENGTH_SHORT).show()
-                // URL Fallback juga diperbaiki
                 val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse("http://maps.google.com/maps?q=loc:$tokoLatitude,$tokoLongitude($tokoLabel)"))
                 startActivity(webIntent)
             }
@@ -95,8 +87,8 @@ class CheckoutActivity : AppCompatActivity() {
             placeOrder()
         }
     }
+
     private fun getCurrentLocation() {
-        // ... (kode ini tetap sama)
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQ_CODE)
             return
@@ -121,8 +113,8 @@ class CheckoutActivity : AppCompatActivity() {
                 }
             }
     }
+
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        // ... (kode ini tetap sama)
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == LOCATION_PERMISSION_REQ_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -132,7 +124,6 @@ class CheckoutActivity : AppCompatActivity() {
             }
         }
     }
-    // =======================================================
 
     private fun placeOrder() {
         val name = binding.etName.text.toString().trim()
@@ -155,14 +146,18 @@ class CheckoutActivity : AppCompatActivity() {
         binding.btnPlaceOrder.isEnabled = false
         binding.btnPlaceOrder.text = "Memproses Pesanan..."
 
-        // === PERUBAHAN UTAMA 2: Tidak lagi mengambil data dari Firestore ===
-        // Langsung proses 'selectedItems' yang diterima dari Intent
-        val itemsForOrder = mutableListOf<HashMap<String, Any>>()
+        // === PERBAIKAN DI SINI ===
+        // Menambahkan 'quantity' dan 'price' ke dalam map item yang dikirim ke Firestore
+        val itemsForOrder = mutableListOf<HashMap<String, Any?>>()
         for (cartItem in selectedItems) {
             itemsForOrder.add(hashMapOf(
                 "productName" to cartItem.productName,
                 "selectedSize" to cartItem.selectedSize,
-                "totalPrice" to cartItem.totalPrice
+                "totalPrice" to cartItem.totalPrice,
+
+                // TAMBAHAN PENTING: Agar admin bisa membaca jumlah dan harga satuan
+                "quantity" to cartItem.quantity,
+                "price" to cartItem.price
             ))
         }
 
@@ -190,7 +185,6 @@ class CheckoutActivity : AppCompatActivity() {
 
     private fun clearCart() {
         val batch = db.batch()
-        // === PERUBAHAN UTAMA 3: Hanya menghapus item yang terpilih ===
         for (item in selectedItems) {
             val docRef = db.collection("carts").document(item.id)
             batch.delete(docRef)

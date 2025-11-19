@@ -5,11 +5,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.surya.parfum.databinding.ItemProductAdminBinding
-import kotlin.apply
-
+import java.text.NumberFormat
+import java.util.*
 
 class ProductAdminAdapter(
-    private val productList: List<Product>,
+    // Menggunakan 'var' agar list bisa diubah saat pencarian
+    private var productList: List<Product>,
     private val onEditClick: (Product) -> Unit,
     private val onDeleteClick: (Product) -> Unit
 ) : RecyclerView.Adapter<ProductAdminAdapter.ProductViewHolder>() {
@@ -25,20 +26,28 @@ class ProductAdminAdapter(
         val product = productList[position]
         holder.binding.apply {
             tvProductName.text = product.name
-            tvProductPrice.text = "Rp ${product.pricePerMl} / ml"
+
+            // Logika Harga: Cek apakah pakai harga tetap atau per ml
+            // Ini aman karena Product.kt Anda sudah support keduanya
+            if (product.price > 0) {
+                tvProductPrice.text = formatCurrency(product.price)
+            } else {
+                tvProductPrice.text = "${formatCurrency(product.pricePerMl)} / ml"
+            }
 
             Glide.with(holder.itemView.context)
                 .load(product.imageUrl)
-                .placeholder(R.drawable.ic_image_placeholder) // Gambar saat loading
-                .error(R.drawable.ic_image_placeholder)       // Gambar jika URL error atau kosong
+                .placeholder(R.drawable.ic_image_placeholder)
+                .error(R.drawable.ic_image_placeholder)
                 .into(ivProductImage)
 
-            // Listener untuk klik hapus
+            // === PERBAIKAN UTAMA DI SINI ===
+            // Menggunakan 'ivDeleteProduct' sesuai dengan file XML asli Anda
             ivDeleteProduct.setOnClickListener {
                 onDeleteClick(product)
             }
 
-            // Listener untuk klik seluruh item (untuk edit)
+            // Klik item untuk edit
             holder.itemView.setOnClickListener {
                 onEditClick(product)
             }
@@ -46,4 +55,16 @@ class ProductAdminAdapter(
     }
 
     override fun getItemCount(): Int = productList.size
+
+    // === FUNGSI PENTING UNTUK PENCARIAN ===
+    fun updateList(newList: List<Product>) {
+        productList = newList
+        notifyDataSetChanged()
+    }
+
+    private fun formatCurrency(amount: Long): String {
+        val format = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
+        format.maximumFractionDigits = 0
+        return format.format(amount)
+    }
 }

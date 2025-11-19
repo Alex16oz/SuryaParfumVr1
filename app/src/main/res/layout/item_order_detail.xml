@@ -1,21 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:paddingVertical="4dp">
+    android:paddingVertical="8dp"
+    android:paddingHorizontal="16dp">
 
     <TextView
         android:id="@+id/tvItemName"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:textStyle="bold"
-        tools:text="One Million Lucky" />
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/tvItemQuantity"
+        android:layout_marginEnd="8dp"
+        tools:text="Suya EDP Vanilla Bloom (30ml)" />
 
     <TextView
-        android:id="@+id/tvItemDetails"
+        android:id="@+id/tvItemQuantity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools:text="Ukuran: 50 ml - Rp 125.000" />
-</LinearLayout>
+        android:textSize="16sp"
+        android:textColor="@android:color/holo_blue_dark"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Jumlah: 2" />
+
+    <TextView
+        android:id="@+id/tvItemPrice"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textColor="?android:attr/textColorSecondary"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvItemName"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:text="Harga: Rp 100.000 | Subtotal: Rp 200.000" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

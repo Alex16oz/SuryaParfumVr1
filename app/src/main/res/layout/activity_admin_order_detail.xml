@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context=".AdminOrderDetailActivity">
 
+    <!-- Top AppBar -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -18,52 +19,79 @@
             app:navigationIcon="@drawable/ic_arrow_back" />
     </com.google.android.material.appbar.AppBarLayout>
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="16dp"
+            android:paddingBottom="80dp"> <!-- Padding untuk menghindari tombol di bawah -->
 
+            <!-- 1. Detail Pelanggan dan Pengiriman -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Detail Pelanggan"
+                android:text="Detail Pelanggan &amp; Pengiriman"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/tvCustomerName"
-                android:layout_width="wrap_content"
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                tools:text="Nama: Rizal" />
+                app:cardCornerRadius="8dp"
+                app:cardElevation="1dp">
 
-            <TextView
-                android:id="@+id/tvCustomerAddress"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                tools:text="Alamat: Jl. Pahlawan No. 123" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="12dp">
 
-            <TextView
-                android:id="@+id/tvCustomerPhone"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                tools:text="Telepon: 081234567890" />
+                    <TextView
+                        android:id="@+id/tvCustomerName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="Nama: Rizal" />
 
-            <Button
-                android:id="@+id/btnViewCustomerLocation"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Lihat Lokasi di Peta"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:visibility="gone"
-                tools:visibility="visible"/>
+                    <TextView
+                        android:id="@+id/tvCustomerPhone"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        tools:text="Telepon: 081234567890" />
+
+                    <TextView
+                        android:id="@+id/tvFulfillmentMethod"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textStyle="italic"
+                        tools:text="Metode: Antar ke Alamat" />
+
+                    <TextView
+                        android:id="@+id/tvCustomerAddress"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        tools:text="Alamat: Jl. Pahlawan No. 123" />
+
+                    <Button
+                        android:id="@+id/btnViewCustomerLocation"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Lihat Lokasi di Peta"
+                        android:drawableStart="@drawable/ic_location"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:visibility="gone"
+                        tools:visibility="visible"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <View
                 android:layout_width="match_parent"
@@ -71,6 +99,7 @@
                 android:layout_marginVertical="16dp"
                 android:background="?android:attr/listDivider" />
 
+            <!-- 2. Detail Pesanan & Status -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -78,12 +107,35 @@
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/tvOrderId"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:orientation="horizontal"
                 android:layout_marginTop="8dp"
-                tools:text="ID Pesanan: RnBOyrZMV..." />
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/tvOrderId"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    tools:text="ID: RnBOyrZMV..." />
+
+                <!-- STATUS (Diatur warnanya di Kotlin) -->
+                <TextView
+                    android:id="@+id/tvOrderStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="4dp"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold"
+                    android:background="@drawable/bg_status_processed"
+                    tools:text="DIPROSES"/>
+
+            </LinearLayout>
+
 
             <TextView
                 android:id="@+id/tvOrderDate"
@@ -92,18 +144,16 @@
                 android:layout_marginTop="4dp"
                 tools:text="Tanggal: 16 Okt 2025, 12:37" />
 
-            <TextView
-                android:id="@+id/tvOrderStatus"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:textStyle="bold"
-                tools:text="Status: Diproses"/>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="16dp"
+                android:background="?android:attr/listDivider" />
 
+            <!-- 3. Item Dipesan -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
                 android:text="Item Dipesan:"
                 android:textStyle="bold" />
 
@@ -112,19 +162,57 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:nestedScrollingEnabled="false"
                 tools:listitem="@layout/item_order_detail"
                 tools:itemCount="2"/>
 
+            <!-- 4. Total Jumlah -->
             <TextView
                 android:id="@+id/tvTotalAmount"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="20dp"
                 android:gravity="end"
-                android:textSize="20sp"
+                android:textSize="22sp"
+                android:textColor="@color/design_default_color_primary"
                 android:textStyle="bold"
                 tools:text="Total: Rp 175.000" />
 
         </LinearLayout>
-    </ScrollView>
-</LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- TOMBOL AKSI (di bagian bawah layar) -->
+    <LinearLayout
+        android:id="@+id/llActionButtonsDetail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end"
+        android:padding="16dp"
+        android:background="?android:attr/colorBackground"
+        android:elevation="12dp"
+        android:layout_gravity="bottom"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <!-- Tombol Tolak (Reject Button) -->
+        <Button
+            android:id="@+id/btnRejectDetail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tolak Pesanan"
+            android:textColor="@color/design_default_color_error"
+            style="@style/Widget.MaterialComponents.Button.TextButton"/>
+
+        <!-- Tombol Setujui (Approve Button) -->
+        <Button
+            android:id="@+id/btnApproveDetail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Setujui Pesanan"
+            android:backgroundTint="@color/design_default_color_primary"
+            android:layout_marginStart="8dp"/>
+
+    </LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

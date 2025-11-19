@@ -8,9 +8,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.firestore.FirebaseFirestore
 import com.surya.parfum.databinding.FragmentAdminDashboardBinding
+import java.util.*
 
 class AdminDashboardFragment : Fragment() {
 
@@ -18,7 +20,9 @@ class AdminDashboardFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var db: FirebaseFirestore
     private lateinit var productAdapter: ProductAdminAdapter
-    private val productList = mutableListOf<Product>()
+
+    // List untuk menyimpan Data Asli (Master Data)
+    private val allProducts = mutableListOf<Product>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -31,25 +35,20 @@ class AdminDashboardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         db = FirebaseFirestore.getInstance()
-        setupRecyclerView() // Now this function exists
-        fetchProducts()     // And this one too
+
+        setupRecyclerView()
+        setupSearchListener() // Tambahkan Listener Pencarian
+        fetchProducts()
 
         binding.fabAddProduct.setOnClickListener {
             startActivity(Intent(requireActivity(), AddEditProductActivity::class.java))
         }
-
-        // The button "Lihat Pesanan Masuk" is now part of this fragment's layout
-        // but the navigation is handled by AdminHomeActivity's BottomNavigationView,
-        // so we can remove the button or its listener if it's still there.
     }
 
-    // =====================================================================
-    // ===== FUNGSI YANG HILANG SUDAH DITAMBAHKAN DI BAWAH INI =====
-    // =====================================================================
-
     private fun setupRecyclerView() {
+        // Inisialisasi adapter dengan list kosong
         productAdapter = ProductAdminAdapter(
-            productList,
+            mutableListOf(), // Mulai dengan list kosong
             onEditClick = { product ->
                 val intent = Intent(requireActivity(), AddEditProductActivity::class.java)
                 intent.putExtra("PRODUCT_ID", product.id)
@@ -65,6 +64,42 @@ class AdminDashboardFragment : Fragment() {
         }
     }
 
+    // === LOGIKA PENCARIAN ===
+    private fun setupSearchListener() {
+        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                filterList(newText)
+                return true
+            }
+        })
+    }
+
+    private fun filterList(query: String?) {
+        if (query != null) {
+            val filteredList = ArrayList<Product>()
+            for (i in allProducts) {
+                // Cari berdasarkan nama (case insensitive)
+                if (i.name.lowercase(Locale.ROOT).contains(query.lowercase(Locale.ROOT))) {
+                    filteredList.add(i)
+                }
+            }
+
+            if (filteredList.isEmpty()) {
+                // Opsional: Tampilkan toast jika tidak ada hasil
+                // Toast.makeText(requireContext(), "Tidak ada data ditemukan", Toast.LENGTH_SHORT).show()
+            }
+            // Update adapter dengan data hasil filter
+            productAdapter.updateList(filteredList)
+        } else {
+            // Jika query kosong, tampilkan semua data
+            productAdapter.updateList(allProducts)
+        }
+    }
+
     private fun fetchProducts() {
         db.collection("products").addSnapshotListener { snapshots, error ->
             if (error != null) {
@@ -73,15 +108,16 @@ class AdminDashboardFragment : Fragment() {
             }
 
             snapshots?.let {
-                productList.clear()
+                allProducts.clear() // Reset data master
                 for (document in it.documents) {
                     val product = document.toObject(Product::class.java)
                     if (product != null) {
                         product.id = document.id
-                        productList.add(product)
+                        allProducts.add(product)
                     }
                 }
-                productAdapter.notifyDataSetChanged()
+                // Tampilkan semua data saat pertama kali load (atau saat ada perubahan di DB)
+                productAdapter.updateList(allProducts)
             }
         }
     }

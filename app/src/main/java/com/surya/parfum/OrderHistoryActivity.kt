@@ -1,88 +1,53 @@
 package com.surya.parfum
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
-import android.widget.Toast
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.google.android.material.tabs.TabLayoutMediator
 import com.surya.parfum.databinding.ActivityOrderHistoryBinding
 
 class OrderHistoryActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityOrderHistoryBinding
-    private lateinit var db: FirebaseFirestore
-    private lateinit var auth: FirebaseAuth
-
-    private lateinit var historyAdapter: OrderHistoryAdapter
-    private val orderList = mutableListOf<Order>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityOrderHistoryBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        db = FirebaseFirestore.getInstance()
-        auth = FirebaseAuth.getInstance()
-
+        setSupportActionBar(binding.topAppBar)
         binding.topAppBar.setNavigationOnClickListener {
             finish()
         }
 
-        setupRecyclerView()
-        fetchUserOrders()
+        setupViewPager()
     }
 
-    private fun setupRecyclerView() {
-        historyAdapter = OrderHistoryAdapter(orderList)
-        binding.rvOrderHistory.apply {
-            layoutManager = LinearLayoutManager(this@OrderHistoryActivity)
-            adapter = historyAdapter
-        }
-    }
+    private fun setupViewPager() {
+        // Menggunakan Adapter ViewPager
+        val adapter = OrderPagerAdapter(this)
+        binding.viewPager.adapter = adapter
 
-    private fun fetchUserOrders() {
-        val currentUser = auth.currentUser
-        if (currentUser == null) {
-            Toast.makeText(this, "Silakan login untuk melihat riwayat", Toast.LENGTH_SHORT).show()
-            finish()
-            return
-        }
-
-        // Ambil data dari 'orders' yang userId-nya sama dengan pengguna saat ini
-        db.collection("orders")
-            .whereEqualTo("userId", currentUser.uid)
-            .orderBy("orderDate", Query.Direction.DESCENDING)
-            .addSnapshotListener { snapshots, error ->
-                if (error != null) {
-                    Toast.makeText(this, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
-                    return@addSnapshotListener
-                }
-
-                if (snapshots != null) {
-                    orderList.clear()
-                    for (document in snapshots.documents) {
-                        val order = document.toObject(Order::class.java)
-                        if (order != null) {
-                            order.id = document.id
-                            orderList.add(order)
-                        }
-                    }
-                    historyAdapter.notifyDataSetChanged()
-                    checkIfEmpty()
-                }
+        // Hubungkan Tab dengan ViewPager
+        TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
+            when (position) {
+                0 -> tab.text = "Dalam Proses" // Tab 1
+                1 -> tab.text = "Riwayat"      // Tab 2
             }
+        }.attach()
     }
 
-    private fun checkIfEmpty() {
-        if (orderList.isEmpty()) {
-            binding.tvEmptyHistory.visibility = View.VISIBLE
-            binding.rvOrderHistory.visibility = View.GONE
-        } else {
-            binding.tvEmptyHistory.visibility = View.GONE
-            binding.rvOrderHistory.visibility = View.VISIBLE
+    // Inner Class Adapter untuk ViewPager
+    private inner class OrderPagerAdapter(activity: AppCompatActivity) : FragmentStateAdapter(activity) {
+        override fun getItemCount(): Int = 2
+
+        override fun createFragment(position: Int): Fragment {
+            return when (position) {
+                0 -> OrderListFragment.newInstance("active") // Kirim filter 'active'
+                1 -> OrderListFragment.newInstance("history") // Kirim filter 'history'
+                else -> OrderListFragment.newInstance("active")
+            }
         }
     }
 }

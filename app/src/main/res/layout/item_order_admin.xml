@@ -6,13 +6,16 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="16dp"
-    android:layout_marginTop="12dp">
+    android:layout_marginTop="12dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp">
 
+        <!-- Nama Pelanggan (Customer Name) -->
         <TextView
             android:id="@+id/tvCustomerName"
             android:layout_width="0dp"
@@ -23,28 +26,9 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toStartOf="@id/tvOrderStatus"
             android:layout_marginEnd="8dp"
-            tools:text="Nama Pelanggan" />
+            tools:text="Sinta Aprilia" />
 
-        <TextView
-            android:id="@+id/tvOrderDate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvCustomerName"
-            tools:text="15 Okt 2025, 14:30" />
-
-        <TextView
-            android:id="@+id/tvOrderTotal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvOrderDate"
-            tools:text="Total: Rp 250.000" />
-
+        <!-- Status Pesanan (Order Status) -->
         <TextView
             android:id="@+id/tvOrderStatus"
             android:layout_width="wrap_content"
@@ -57,13 +41,86 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Diproses" />
+
+        <!-- Tanggal Pesanan (Order Date) -->
         <TextView
-            android:id="@+id/tvFulfillment"
+            android:id="@+id/tvOrderDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="4dp"
+            android:textColor="?android:attr/textColorSecondary"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvCustomerName"
+            tools:text="06 Nov 2025, 11:15" />
+
+        <!-- Total Pesanan (Order Total) -->
+        <TextView
+            android:id="@+id/tvOrderTotal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvOrderDate"
+            tools:text="Total: Rp 30.000" />
+
+        <!-- Metode Pemenuhan (Fulfillment Method) -->
+        <TextView
+            android:id="@+id/tvFulfillment"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="?android:attr/textColorPrimary"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvOrderTotal"
+            app:layout_constraintEnd_toEndOf="parent"
             tools:text="Metode: Ambil di Toko"/>
+
+        <!-- Garis Pemisah (Divider) -->
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="16dp"
+            android:background="?android:attr/listDivider"
+            app:layout_constraintTop_toBottomOf="@id/tvFulfillment" />
+
+        <!-- Container Tombol Aksi (Button Container) -->
+        <LinearLayout
+            android:id="@+id/llActionButtons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="12dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/divider"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <!-- Tombol Tolak (Reject Button) -->
+            <Button
+                android:id="@+id/btnReject"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tolak"
+                android:textColor="@color/design_default_color_error"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:visibility="gone"
+                tools:visibility="visible"/>
+
+            <!-- Tombol Setujui (Approve Button) -->
+            <Button
+                android:id="@+id/btnApprove"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Setujui"
+                android:backgroundTint="@color/design_default_color_primary"
+                style="@style/Widget.MaterialComponents.Button"
+                android:layout_marginStart="8dp"
+                android:visibility="gone"
+                tools:visibility="visible"/>
+
+        </LinearLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

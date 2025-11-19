@@ -32,7 +32,7 @@ class AdminHomeActivity : AppCompatActivity() {
             loadFragment(AdminDashboardFragment())
         }
 
-        // Listener untuk navigasi bawah (tidak berubah)
+        // Listener untuk navigasi bawah
         binding.bottomNavigation.setOnItemSelectedListener {
             when (it.itemId) {
                 R.id.nav_admin_dashboard -> {
@@ -40,7 +40,10 @@ class AdminHomeActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_admin_orders -> {
-                    loadFragment(AdminOrderListFragment())
+                    // === PERUBAHAN DI SINI ===
+                    // Mengganti AdminOrderListFragment() dengan AdminOrdersParentFragment()
+                    // Ini agar tampilan TAB (Perlu Diproses / Riwayat) muncul
+                    loadFragment(AdminOrdersParentFragment())
                     true
                 }
                 else -> false
@@ -53,7 +56,7 @@ class AdminHomeActivity : AppCompatActivity() {
         // 'Inflate' atau pasang layout menu kita ke toolbar
         menuInflater.inflate(R.menu.main_menu, menu)
 
-        // Cari item keranjang dan sembunyikan
+        // Cari item keranjang dan sembunyikan karena ini halaman admin
         val cartItem = menu?.findItem(R.id.action_cart)
         cartItem?.isVisible = false
 

@@ -3,29 +3,58 @@ package com.surya.parfum
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.Timestamp
 import com.surya.parfum.databinding.ItemOrderDetailBinding
+import java.text.NumberFormat
+import java.util.*
 
-// Kita gunakan HashMap untuk fleksibilitas karena data item disimpan sebagai Map di Firestore
-class  OrderDetailAdapter(private val items: List<HashMap<String, Any>>) :
-    RecyclerView.Adapter<OrderDetailAdapter.ViewHolder>() {
+class OrderDetailAdapter(private val itemList: List<OrderItem>) :
+    RecyclerView.Adapter<OrderDetailAdapter.ItemViewHolder>() {
 
-    inner class ViewHolder(val binding: ItemOrderDetailBinding) : RecyclerView.ViewHolder(binding.root)
+    inner class ItemViewHolder(val binding: ItemOrderDetailBinding) :
+        RecyclerView.ViewHolder(binding.root)
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val binding = ItemOrderDetailBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return ViewHolder(binding)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
+        val binding = ItemOrderDetailBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
+        return ItemViewHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = items[position]
+    override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
+        val item = itemList[position]
+
         holder.binding.apply {
-            tvItemName.text = item["productName"] as? String ?: "Nama Produk Tidak Ada"
-            val size = item["selectedSize"]
-            val price = item["totalPrice"]
-            tvItemDetails.text = "Ukuran: $size ml - Rp $price"
+            // 1. Nama Produk
+            var nameText = item.productName
+            item.selectedSize?.let { sizeValue ->
+                nameText = "${item.productName} ($sizeValue)"
+            }
+            tvItemName.text = nameText
+
+            // 2. Logika Cerdas untuk Data Kosong
+            // Jika quantity 0 (karena tidak ada di DB), kita asumsikan 1 agar tampilan tidak aneh
+            val realQuantity = if (item.quantity > 0) item.quantity else 1
+
+            // Jika price 0 (karena tidak ada di DB), kita hitung dari totalPrice
+            val realPrice = if (item.price > 0) item.price else (item.totalPrice / realQuantity)
+
+            // 3. Tampilkan Data
+            tvItemQuantity.text = "Jumlah: $realQuantity"
+
+            val formattedPrice = formatCurrency(realPrice)
+            val formattedSubtotal = formatCurrency(item.totalPrice)
+
+            tvItemPrice.text = "Harga Satuan: $formattedPrice | Subtotal: $formattedSubtotal"
         }
     }
 
-    override fun getItemCount(): Int = items.size
+    override fun getItemCount(): Int = itemList.size
+
+    private fun formatCurrency(amount: Long): String {
+        val format = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
+        format.maximumFractionDigits = 0
+        return format.format(amount)
+    }
 }
