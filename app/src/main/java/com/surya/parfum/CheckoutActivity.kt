@@ -239,32 +239,43 @@ class CheckoutActivity : AppCompatActivity() {
         binding.btnPlaceOrder.isEnabled = false
         binding.btnPlaceOrder.text = "Memproses Pesanan..."
 
-        val itemsForOrder = mutableListOf<HashMap<String, Any?>>()
+// ... di dalam method placeOrder() ...
+
+// 1. Ganti HashMap dengan List of OrderItem agar tipe data lebih ketat
+        val itemsForOrder = mutableListOf<OrderItem>()
+
         for (cartItem in selectedItems) {
-            itemsForOrder.add(hashMapOf(
-                "productName" to cartItem.productName,
-                "selectedSize" to cartItem.selectedSize,
-                "totalPrice" to cartItem.totalPrice,
-                "quantity" to cartItem.quantity,
-                "price" to cartItem.price
-            ))
+            // 2. Lakukan KONVERSI manual ke Long di sini
+            val item = OrderItem(
+                productId = cartItem.productId,
+                productName = cartItem.productName,
+                selectedSize = cartItem.selectedSize.toLong(), // PENTING: .toLong()
+                quantity = cartItem.quantity.toLong(),         // PENTING: .toLong()
+                price = cartItem.price,
+                totalPrice = cartItem.totalPrice
+            )
+            itemsForOrder.add(item)
         }
 
-        val orderData = hashMapOf(
-            "userId" to currentUser.uid,
-            "customerName" to name,
-            "address" to address,
-            "phone" to phone,
-            "totalAmount" to totalAmount,
-            "items" to itemsForOrder,
-            "orderDate" to FieldValue.serverTimestamp(),
-            "status" to "Diproses",
-            "fulfillmentMethod" to fulfillmentMethod,
-            "customerLocation" to if (fulfillmentMethod == "Antar ke Alamat") customerLocation else null
+// 3. Gunakan objek Order (jangan HashMap) untuk data utama
+        val orderData = Order(
+            userId = currentUser.uid,
+            customerName = name,
+            address = address,
+            phone = phone,
+            totalAmount = totalAmount,
+            items = itemsForOrder, // Masukkan List yang sudah bertipe Long
+            orderDate = com.google.firebase.Timestamp.now(),
+            status = "Diproses",
+            fulfillmentMethod = fulfillmentMethod,
+            customerLocation = if (fulfillmentMethod == "Antar ke Alamat") customerLocation else null
         )
 
+// 4. Kirim ke Firestore
         db.collection("orders").add(orderData)
-            .addOnSuccessListener { clearCart() }
+            .addOnSuccessListener {
+                clearCart()
+            }
             .addOnFailureListener {
                 Toast.makeText(this, "Gagal membuat pesanan", Toast.LENGTH_SHORT).show()
                 binding.btnPlaceOrder.isEnabled = true
