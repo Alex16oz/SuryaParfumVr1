@@ -56,6 +56,18 @@ class MainActivity : AppCompatActivity() {
                     }
                     true
                 }
+
+                // ===== LOGIKA BARU: TOMBOL KOMPLAIN =====
+                R.id.action_complain -> {
+                    // Semua user (login/tidak) bisa coba akses, tapi sebaiknya login
+                    // Jika mau wajib login, tambahkan cek auth.currentUser != null
+                    startActivity(
+                        Intent(this, PengajuanKomplainActivity::class.java)
+                    )
+                    true
+                }
+                // ========================================
+
                 else -> false
             }
         }
@@ -80,6 +92,9 @@ class MainActivity : AppCompatActivity() {
                     // The existing logout logic
                     auth.signOut()
                     Toast.makeText(this, "Anda telah logout", Toast.LENGTH_SHORT).show()
+                    // Restart Activity agar state UI kembali ke awal (opsional)
+                    startActivity(Intent(this, LoginActivity::class.java))
+                    finish()
                     true
                 }
                 else -> false
@@ -90,7 +105,7 @@ class MainActivity : AppCompatActivity() {
         popup.show()
     }
 
-    // ===== FUNGSI BARU UNTUK MENGALIHKAN ADMIN =====
+    // ===== FUNGSI UNTUK MENGALIHKAN ADMIN =====
     private fun goToAdminDashboard() {
         val intent = Intent(this, AdminHomeActivity::class.java)
         // Hapus semua activity sebelumnya dari tumpukan

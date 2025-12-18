@@ -40,7 +40,7 @@ class AdminHomeActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_admin_orders -> {
-                    // === PERUBAHAN DI SINI ===
+                    // === PERUBAHAN DI SINI (DARI PROYEK ASLI ANDA) ===
                     // Mengganti AdminOrderListFragment() dengan AdminOrdersParentFragment()
                     // Ini agar tampilan TAB (Perlu Diproses / Riwayat) muncul
                     loadFragment(AdminOrdersParentFragment())
@@ -66,6 +66,16 @@ class AdminHomeActivity : AppCompatActivity() {
     // ===== 2. FUNGSI UNTUK MENANGANI KLIK PADA ITEM MENU =====
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
+
+            // === LOGIKA BARU: TOMBOL KOMPLAIN (ADMIN) ===
+            R.id.action_complain -> {
+                startActivity(
+                    Intent(this, AdminKomplainActivity::class.java)
+                )
+                true
+            }
+            // ===========================================
+
             R.id.action_profile -> {
                 // Tampilkan popup menu saat ikon profil diklik
                 showPopupMenu()

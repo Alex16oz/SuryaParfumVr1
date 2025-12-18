@@ -13,4 +13,10 @@
         android:icon="@drawable/ic_person"
         app:showAsAction="ifRoom" />
 
+    <item
+        android:id="@+id/action_complain"
+        android:icon="@drawable/ic_complain"
+        android:title="Komplain"
+        app:showAsAction="always" />
+
 </menu>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <!-- Nama -->
+        <TextView
+            android:id="@+id/tvNama"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nama Pelanggan"
+            android:textStyle="bold"
+            android:textSize="16sp"/>
+
+        <!-- Nomor Order -->
+        <TextView
+            android:id="@+id/tvOrder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No Order: ORD001"
+            android:textColor="#555555"
+            android:layout_marginTop="4dp"/>
+
+        <!-- Alasan -->
+        <TextView
+            android:id="@+id/tvAlasan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Alasan komplain ditampilkan di sini"
+            android:layout_marginTop="6dp"/>
+
+        <!-- Foto Bukti -->
+        <ImageView
+            android:id="@+id/imgBukti"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:layout_marginTop="8dp"
+            android:scaleType="centerCrop"
+            android:background="#E0E0E0"
+            android:contentDescription="Foto Bukti Komplain"/>
+
+        <!-- Status -->
+        <TextView
+            android:id="@+id/tvStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Status: Menunggu"
+            android:textStyle="italic"
+            android:textColor="#FF9800"
+            android:layout_marginTop="6dp"/>
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>
