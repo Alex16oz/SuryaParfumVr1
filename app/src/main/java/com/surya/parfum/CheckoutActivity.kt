@@ -14,12 +14,12 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import com.surya.parfum.databinding.ActivityCheckoutBinding
@@ -41,6 +41,29 @@ class CheckoutActivity : AppCompatActivity() {
 
     // ID Channel Notifikasi
     private val CHANNEL_ID = "order_notifications"
+
+    // Launcher untuk menerima hasil dari Peta OSM
+    private val mapPickerLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK && result.data != null) {
+            val lat = result.data!!.getDoubleExtra("LATITUDE", 0.0)
+            val lon = result.data!!.getDoubleExtra("LONGITUDE", 0.0)
+            val address = result.data!!.getStringExtra("ADDRESS")
+
+            // Simpan lokasi ke variabel global
+            customerLocation = GeoPoint(lat, lon)
+
+            // Tampilkan alamat di EditText
+            if (address != null) {
+                binding.etAddress.setText(address)
+            } else {
+                binding.etAddress.setText("Lokasi Koordinat: $lat, $lon")
+            }
+
+            Toast.makeText(this, "Lokasi pengiriman dipilih!", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -102,12 +125,19 @@ class CheckoutActivity : AppCompatActivity() {
             getCurrentLocation()
         }
 
+        // --- TAMBAHAN: TOMBOL BUKA PETA OSM ---
+        binding.btnPickOnMap.setOnClickListener {
+            val intent = Intent(this, OsmPickerActivity::class.java)
+            mapPickerLauncher.launch(intent)
+        }
+        // --------------------------------------
+
         binding.btnPlaceOrder.setOnClickListener {
             placeOrder()
         }
     }
 
-    // --- FUNGSI LOKASI ---
+    // --- FUNGSI LOKASI GPS (Default) ---
     private fun getCurrentLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQ_CODE)
@@ -123,7 +153,7 @@ class CheckoutActivity : AppCompatActivity() {
                         if (addresses != null && addresses.isNotEmpty()) {
                             val address = addresses[0].getAddressLine(0)
                             binding.etAddress.setText(address)
-                            Toast.makeText(this, "Lokasi ditemukan!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, "Lokasi GPS ditemukan!", Toast.LENGTH_SHORT).show()
                         }
                     } catch (e: Exception) {
                         Toast.makeText(this, "Gagal mengubah koordinat menjadi alamat", Toast.LENGTH_SHORT).show()
@@ -136,7 +166,6 @@ class CheckoutActivity : AppCompatActivity() {
 
     // --- FUNGSI NOTIFIKASI ---
     private fun createNotificationChannel() {
-        // Channel hanya diperlukan untuk Android O (API 26) ke atas
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = "Status Pesanan"
             val descriptionText = "Notifikasi untuk status pesanan parfum"
@@ -167,7 +196,6 @@ class CheckoutActivity : AppCompatActivity() {
     }
 
     private fun showOrderSuccessNotification() {
-        // Intent untuk membuka MainActivity saat notifikasi diklik
         val intent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
@@ -175,9 +203,6 @@ class CheckoutActivity : AppCompatActivity() {
             this, 0, intent, PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Builder Notifikasi
-        // NOTE: Pastikan kamu punya icon di res/drawable/ic_notification atau gunakan icon default
-        // Di sini saya pakai ic_launcher_foreground sebagai contoh aman
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle("Pesanan Berhasil!")
@@ -186,7 +211,6 @@ class CheckoutActivity : AppCompatActivity() {
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
 
-        // Tampilkan Notifikasi
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.POST_NOTIFICATIONS
@@ -211,7 +235,7 @@ class CheckoutActivity : AppCompatActivity() {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // Izin notifikasi diberikan
                 } else {
-                    Toast.makeText(this, "Izin notifikasi ditolak, Anda tidak akan menerima update status.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Izin notifikasi ditolak", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -233,45 +257,44 @@ class CheckoutActivity : AppCompatActivity() {
             Toast.makeText(this, "Alamat dan nomor telepon wajib diisi untuk pengantaran", Toast.LENGTH_SHORT).show()
             return
         }
+        // Validasi tambahan: Pastikan customerLocation ada jika pilih antar
+        if (fulfillmentMethod == "Antar ke Alamat" && customerLocation == null) {
+            Toast.makeText(this, "Mohon tentukan lokasi pengiriman (GPS/Peta)!", Toast.LENGTH_LONG).show()
+            return
+        }
 
         val currentUser = auth.currentUser ?: return
 
         binding.btnPlaceOrder.isEnabled = false
         binding.btnPlaceOrder.text = "Memproses Pesanan..."
 
-// ... di dalam method placeOrder() ...
-
-// 1. Ganti HashMap dengan List of OrderItem agar tipe data lebih ketat
         val itemsForOrder = mutableListOf<OrderItem>()
 
         for (cartItem in selectedItems) {
-            // 2. Lakukan KONVERSI manual ke Long di sini
             val item = OrderItem(
                 productId = cartItem.productId,
                 productName = cartItem.productName,
-                selectedSize = cartItem.selectedSize.toLong(), // PENTING: .toLong()
-                quantity = cartItem.quantity.toLong(),         // PENTING: .toLong()
+                selectedSize = cartItem.selectedSize.toLong(),
+                quantity = cartItem.quantity.toLong(),
                 price = cartItem.price,
                 totalPrice = cartItem.totalPrice
             )
             itemsForOrder.add(item)
         }
 
-// 3. Gunakan objek Order (jangan HashMap) untuk data utama
         val orderData = Order(
             userId = currentUser.uid,
             customerName = name,
             address = address,
             phone = phone,
             totalAmount = totalAmount,
-            items = itemsForOrder, // Masukkan List yang sudah bertipe Long
+            items = itemsForOrder,
             orderDate = com.google.firebase.Timestamp.now(),
             status = "Diproses",
             fulfillmentMethod = fulfillmentMethod,
             customerLocation = if (fulfillmentMethod == "Antar ke Alamat") customerLocation else null
         )
 
-// 4. Kirim ke Firestore
         db.collection("orders").add(orderData)
             .addOnSuccessListener {
                 clearCart()
@@ -291,9 +314,7 @@ class CheckoutActivity : AppCompatActivity() {
         }
 
         batch.commit().addOnSuccessListener {
-            // TRIGGER NOTIFIKASI DI SINI
             showOrderSuccessNotification()
-
             Toast.makeText(this, "Pesanan berhasil dibuat!", Toast.LENGTH_LONG).show()
 
             val intent = Intent(this, MainActivity::class.java)

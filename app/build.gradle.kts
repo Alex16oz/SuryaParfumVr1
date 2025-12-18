@@ -52,6 +52,7 @@ dependencies {
     implementation("androidx.camera:camera-camera2:$cameraXVersion")
     implementation("androidx.camera:camera-lifecycle:$cameraXVersion")
     implementation("androidx.camera:camera-video:$cameraXVersion")
+    implementation("org.osmdroid:osmdroid-android:6.1.18")
 
     // Gunakan versi spesifik untuk view & extensions
     implementation("androidx.camera:camera-view:1.3.3")
